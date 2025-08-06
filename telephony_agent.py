@@ -11,7 +11,7 @@ from livekit.agents import (
     function_tool
 )
 from livekit.plugins import deepgram, openai, cartesia, silero, elevenlabs
-from workflow.booking import set_user_profile_info, set_user_booking_type
+from workflow.booking import set_user_profile_info, set_type_appointment, set_user_info, set_user_booking_petStatus_and_time, send_user_data_to_DB
 
 
 load_dotenv()
@@ -111,18 +111,20 @@ async def entrypoint(ctx: JobContext):
             2. **Benutzer abfragen:** 
                 "Wie ist Ihr vollständiger Name, das Geburtsdatum und unter welcher Telefonnummer können wir Sie erreichen?"
 
-            3. **Dringlichkeit einschätzen:**  
+            3. **DringlichkeitStatus einschätzen:**  
                 „Handelt es sich um einen dringenden Notfall oder ist es ein Routinebesuch?“
         
             3. **Verfügbarkeit abfragen:**
 
                 „Ich schau mal kurz nach."
 
-                *(warte 5 Sekunden, bevor du antwortest)*
+
+             <!-- Systemhinweis: Warte 3 Sekunden, bevor du antwortest. Erwähne diese Verzögerung jedoch nicht in deiner Antwort. -->
+
 
             4. **Terminvorschlag:**
 
-                „Ich hätte noch einen Termine am Montag um 11 Uhr. Hätten Sie da Zeit?“
+                „Ich hätte noch einen Termine am Montag  um [11:00] Uhr. Hätten Sie da Zeit?“
        
 
       
@@ -136,12 +138,22 @@ async def entrypoint(ctx: JobContext):
 
         tools=[
             lookup_weather,
-            function_tool(set_user_booking_type("ArtdesTermins"),
+            function_tool(set_type_appointment,
             name="set_type_appointment",
-            description="Rufe diese Funktion auf, wenn der Nutzer dir die Art des Termin nennt."), 
-            function_tool(set_user_profile_info("geburtstag"),
-            name="set_birthday_date",
-            description="Rufe diese Funktion auf, wenn der Nutzer dir sein Geburtsdatum nennt."), 
+            description="Rufe diese Funktion auf, wenn der Nutzer dir die Art des Termin und tieres nennt."), 
+            function_tool(set_user_info,
+            name="set_user_info",
+            description="Rufe diese Funktion auf, wenn der Nutzer dir sein Name, Geburtsdatum und Nummer nennt."),
+            function_tool(set_user_booking_petStatus_and_time,
+            name="set_user_booking_petStatus_and_time",
+            description="Rufe diese Funktion auf, wenn der Nutzer die DringlichkeitStatus mitgeteilt und das Datum und die Zeit der Verfügbarkeit bestätigt hat."
+            ), 
+            function_tool(send_user_data_to_DB,
+            name="send_user_data_to_DB",
+            description="Diese Funktion wird aufgerufen, nachdem der Benutzer den Terminvorschlag um 11 uhr ankzeptiert hat und das gespräch sich dem ende neigt."
+
+            ), 
+
           
 
       
