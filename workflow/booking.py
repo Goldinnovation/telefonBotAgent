@@ -14,13 +14,13 @@ from livekit.agents import (
 
 
 patientenDaten = {
-    "name": "",
-    "geburtstag":"", 
-    "nummer":"", 
-    "status":"",
-    "untersuchungsart":"", 
-    "tier": "",
-    "Zeit": ""
+    "Name": "",
+    "Geburtstag":"", 
+    "Nummer":"", 
+    "Dringlichkeit":"",
+    "Untersuchung":"", 
+    "Tier": "",
+    "Termin": ""
 
 }
 
@@ -40,17 +40,17 @@ def set_user_profile_info(field: str):
 
 # Gets the type of appointment 
 @function_tool
-async def set_type_appointment(context: RunContext, untersuchungsart: str, tier:str):
-    print(f'Art des Termin und für wen  {untersuchungsart}')
+async def set_type_appointment(context: RunContext, untersuchung: str, tier:str):
+    print(f'Art des Termin und für wen  {untersuchung}')
     print(f'tier des patienten  {tier}')
 
 
-    patientenDaten["untersuchungsart"] = untersuchungsart
-    patientenDaten["tier"] = tier
+    patientenDaten["Untersuchung"] = untersuchung
+    patientenDaten["Tier"] = tier
 
     return f'wurde erfolgreich eingetragen'
 
-    return set_type_appointment
+   
 
 
 
@@ -60,9 +60,9 @@ async def set_user_info(context: RunContext, name: str, geburtstag: str, nummer:
     print(f'geburtstag: {geburtstag}')
     print(f'numner {nummer}')
 
-    patientenDaten["name"] = name
-    patientenDaten["geburtstag"] = geburtstag
-    patientenDaten["nummer"] = nummer
+    patientenDaten["Name"] = name
+    patientenDaten["Geburtstag"] = geburtstag
+    patientenDaten["Nummer"] = nummer
 
 
 
@@ -71,12 +71,12 @@ async def set_user_info(context: RunContext, name: str, geburtstag: str, nummer:
 
 
 @function_tool
-async def set_user_booking_petStatus_and_time(context: RunContext, DringlichkeitStatus: str, Datum:str, Zeit:str):
-    print(f'DringlichkeitStatus {DringlichkeitStatus}')
-    print(f'Zeit {Zeit}')
+async def set_user_booking_petStatus_and_time(context: RunContext, dringlichkeit: str, termin:str):
+    print(f'DringlichkeitStatus {dringlichkeit}')
+    print(f'Zeit {termin}')
 
-    patientenDaten["status"] = DringlichkeitStatus
-    patientenDaten["Zeit"] = Zeit
+    patientenDaten["Dringlichkeit"] = dringlichkeit
+    patientenDaten["Termin"] = termin
   
 
 
@@ -86,15 +86,71 @@ async def set_user_booking_petStatus_and_time(context: RunContext, Dringlichkeit
 
 
 
+
 @function_tool
-async def send_user_data_to_DB(context: RunContext, value:str):
+async def checks_users_totalInput_before_DBCreation(context: RunContext, nutzerdaten:str):
 
-    print("patienten daten am Ende", patientenDaten)
-    print("value", value)
-  
+    """
+    Checks which patient data fields are missing and returns appropriate messages.
+    If all data is present, creates a DB record.
+    """
+
+    print("checks_users_totalInput_before_DBCreation is executed")
+    print("Nutzerdaten", nutzerdaten)
+
+    if(nutzerdaten):
+        status_ai_message = check_nutzerData_Input_daten(nutzerdaten)
+
+        print("status_ai_message", status_ai_message)
+
+        return status_ai_message
 
 
-    return f'Daten wurden erfolgreich hinterlegt'
+
+
+def check_nutzerData_Input_daten(nutzerdaten:str):
+
+    print("trigger in check_nutzerData_Input_daten")
+
+    # Split the catched values into strings for a value check
+    nutzerdaten_liste = nutzerdaten.split()
+    
+    # get the keys that does not match the values: 
+    nutzerdaten_kein_match = [key for key, value in patientenDaten.items() if value not in nutzerdaten_liste]
+
+
+    # Adds the correct pronoun before the key for proper grammar
+    pronouns = {
+    "Name": "Ihren",
+    "Geburtstag": "Ihren",
+    "Nummer": "Ihre",
+    "Dringlichkeit": "Ihren",
+    "Untersuchung": "Ihre",
+    "Tier": "Ihr",
+    "Termin": "Ihre",
+    }
+
+
+    if len(nutzerdaten_kein_match) == 1:
+        key = nutzerdaten_kein_match[0]
+        pronoun = pronouns.get(key, "Ihren")
+        return f"Ich habe gerade gesehen, dass unser System {pronoun} {key} nicht richtig übernommen hat. Können Sie mir bitte noch {pronoun} {key} nennen?"
+
+    elif nutzerdaten_kein_match:
+        fehlende = ", ".join(nutzerdaten_kein_match)
+        return f"Leider fehlen noch folgende Daten: {fehlende}. Können Sie mir diese bitte nennen?"
+
+    else:
+        print("triggerd in db ")
+        create_db_record(patientenDaten)
+        return "Alle Daten sind vorhanden, danke!"
+
+
+
+
+def create_db_record(): 
+    print("data send to db", )
+
 
      
 
