@@ -16,13 +16,13 @@ from db.dbService import CreateEntryService
 
 
 patientenDaten = {
-    "Name": "Philipp",
-    "Geburtstag":"1997-01-01", 
-    "Nummer":"017612345678", 
-    "Dringlichkeit":"Routinebesuch",
-    "Untersuchung":"Untersuchung der Leber", 
-    "Tier": "Hund",
-    "Termin": "2025-08-16"
+    "Name": "",
+    "Geburtstag":"", 
+    "Nummer":"", 
+    "Dringlichkeit":"",
+    "Untersuchung":"", 
+    "Tier": "",
+    "Termin": ""
 }
 
 @function_tool
