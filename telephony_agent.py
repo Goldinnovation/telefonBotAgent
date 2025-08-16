@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from dotenv import load_dotenv
 from livekit.agents import (
     Agent,
@@ -87,13 +88,15 @@ async def entrypoint(ctx: JobContext):
             smart_format=True,
             filler_words=True,
             endpointing_ms=25,
-            sample_rate=16000
+            sample_rate=16000,
+            api_key=os.getenv("DEEPGRAM_API_KEY")  # Explicitly pass API key
         ),
         
         # Large Language Model - GPT-4o-mini
         llm=openai.LLM(
             model="gpt-4o-mini",
-            temperature=0.5
+            temperature=0.5,
+            api_key=os.getenv("OPENAI_API_KEY")  # Explicitly pass API key
         ),
         
         # Text-to-Speech - Cartesia Sonic-2
@@ -106,7 +109,8 @@ async def entrypoint(ctx: JobContext):
         # )
           tts=openai.TTS(
             voice="shimmer",
-            speed=1.1
+            speed=1.1,
+            api_key=os.getenv("OPENAI_API_KEY")  # Explicitly pass API key
           ),
     )
     
