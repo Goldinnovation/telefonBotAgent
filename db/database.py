@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException, FastAPI, Depends
 from surrealdb import Surreal, AsyncSurreal
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 DATABASE_URL = os.getenv("SURREALDB_URL")
 DATABASE_USER = os.getenv("SURREALDB_USER")
@@ -30,18 +33,14 @@ async def get_db():
             "password": DATABASE_PASS
         })
 
-        yield db
+        return db
         
     except Exception as e:
         print(f"Database connection error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Database connection failed: {str(e)}")
-    finally:
-        # Always close the connection when the dependency is done
-        if db is not None:
-            try:
-                await db.close()
-            except Exception as e:
-                print(f"Warning: Error closing database connection: {str(e)}")
+        raise Exception(f"Database connection failed: {str(e)}")
+
+
+
 
 
 

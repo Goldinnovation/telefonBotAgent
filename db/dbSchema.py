@@ -1,7 +1,12 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, validator
+from typing import Optional
 from datetime import date
 
-class Entry(BaseModel):
-    name: Optional[str] = None
-    value: Optional[str] = None
+class PatientData(BaseModel):
+    Name: str
+    Geburtstag: str
+    Nummer: str
+    Dringlichkeit: str
+    Untersuchung: str
+    Tier: str
+    Termin: str

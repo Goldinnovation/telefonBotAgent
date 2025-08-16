@@ -1,15 +1,26 @@
-from fastapi import HTTPException
-from surrealdb import RecordID
+from db.database import get_db
+from db.dbSchema import PatientData
 
-async def CreateEntryService(entry, db):
-    try:        
-        # Prepare the data for database insertion using the simple Entry schema
-        entry_data = {
-            "name": entry.name,
-            "value": entry.value,
-        }
-                
-        result = await db.create("entry", entry_data)
+async def CreateEntryService(
+        entry, 
+        db=None
+    ):
+    """Create an entry in the database"""
+    try:    
+        # If no db is provided, get one
+        if db is None:
+            db = await get_db()
+            
+        print("CreateEntryService: ", entry)    
+        
+        # Convert PatientData object to dictionary
+        entry_data = entry.dict()
+        
+        # Add today's date and time
+        from datetime import datetime
+        entry_data["created_datetime"] = datetime.now().isoformat()
+
+        result = await db.create("PatientenTermin", entry_data)
         
         return {
             "status": "success", 
@@ -17,4 +28,4 @@ async def CreateEntryService(entry, db):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database operation failed: {str(e)}")
+        raise Exception(f"Database operation failed: {str(e)}")

@@ -12,16 +12,17 @@ from livekit.agents import (
     function_tool
 )
 
+from db.dbService import CreateEntryService
+
 
 patientenDaten = {
-    "Name": "",
-    "Geburtstag":"", 
-    "Nummer":"", 
-    "Dringlichkeit":"",
-    "Untersuchung":"", 
-    "Tier": "",
-    "Termin": ""
-
+    "Name": "Philipp",
+    "Geburtstag":"1997-01-01", 
+    "Nummer":"017612345678", 
+    "Dringlichkeit":"Routinebesuch",
+    "Untersuchung":"Untersuchung der Leber", 
+    "Tier": "Hund",
+    "Termin": "2025-08-16"
 }
 
 @function_tool
@@ -32,10 +33,6 @@ def set_user_profile_info(field: str):
 
     return set_birtday_date
    
-
-
-
-
 
 
 # Gets the type of appointment 
@@ -88,7 +85,7 @@ async def set_user_booking_petStatus_and_time(context: RunContext, dringlichkeit
 
 
 @function_tool
-async def checks_users_totalInput_before_DBCreation(context: RunContext, nutzerdaten:str):
+async def checks_users_totalInput_before_DBCreation(context: RunContext, nutzerdaten: str):
 
     """
     Checks which patient data fields are missing and returns appropriate messages.
@@ -99,7 +96,7 @@ async def checks_users_totalInput_before_DBCreation(context: RunContext, nutzerd
     print("Nutzerdaten", nutzerdaten)
 
     if(nutzerdaten):
-        status_ai_message = check_nutzerData_Input_daten(nutzerdaten)
+        status_ai_message = await check_nutzerData_Input_daten(nutzerdaten)
 
         print("status_ai_message", status_ai_message)
 
@@ -108,16 +105,15 @@ async def checks_users_totalInput_before_DBCreation(context: RunContext, nutzerd
 
 
 
-def check_nutzerData_Input_daten(nutzerdaten:str):
+async def check_nutzerData_Input_daten(nutzerdaten:str):
 
     print("trigger in check_nutzerData_Input_daten")
 
-    # Split the catched values into strings for a value check
-    nutzerdaten_liste = nutzerdaten.split()
-    
-    # get the keys that does not match the values: 
-    nutzerdaten_kein_match = [key for key, value in patientenDaten.items() if value not in nutzerdaten_liste]
-
+    # Check which fields are missing from patientenDaten
+    missing_fields = []
+    for key, value in patientenDaten.items():
+        if not value or value == "":
+            missing_fields.append(key)
 
     # Adds the correct pronoun before the key for proper grammar
     pronouns = {
@@ -130,26 +126,26 @@ def check_nutzerData_Input_daten(nutzerdaten:str):
     "Termin": "Ihre",
     }
 
-
-    if len(nutzerdaten_kein_match) == 1:
-        key = nutzerdaten_kein_match[0]
+    print("missing_fields", missing_fields)
+    if len(missing_fields) == 1:
+        key = missing_fields[0]
         pronoun = pronouns.get(key, "Ihren")
         return f"Ich habe gerade gesehen, dass unser System {pronoun} {key} nicht richtig übernommen hat. Können Sie mir bitte noch {pronoun} {key} nennen?"
 
-    elif nutzerdaten_kein_match:
-        fehlende = ", ".join(nutzerdaten_kein_match)
+    elif missing_fields:
+        fehlende = ", ".join(missing_fields)
         return f"Leider fehlen noch folgende Daten: {fehlende}. Können Sie mir diese bitte nennen?"
 
     else:
         print("triggerd in db ")
-        create_db_record(patientenDaten)
+
+        # Create a PatientData object from the dictionary
+        from db.dbSchema import PatientData
+        patient = PatientData(**patientenDaten)
+        await CreateEntryService(patient)
+        
         return "Alle Daten sind vorhanden, danke!"
 
-
-
-
-def create_db_record(): 
-    print("data send to db", )
 
 
      

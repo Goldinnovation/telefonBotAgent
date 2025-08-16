@@ -48,23 +48,20 @@ async def entrypoint(ctx: JobContext):
         instructions= klara_instructions,
 
         tools=[
-            function_tool(set_type_appointment,
-            name="set_type_appointment",
-            description="Rufe diese Funktion auf, wenn der Nutzer dir die Art des Termin und tieres nennt."), 
-            function_tool(set_user_info,
-            name="set_user_info",
-            description="Rufe diese Funktion auf, wenn der Nutzer dir sein Name, Geburtsdatum und Nummer nennt."),
-            function_tool(set_user_booking_petStatus_and_time,
-            name="set_user_booking_petStatus_and_time",
-            description="Rufe diese Funktion auf, wenn der Nutzer die DringlichkeitStatus mitgeteilt und das Datum und die Zeit der Verfügbarkeit bestätigt hat."
-            ), 
+            # function_tool(set_type_appointment,
+            #name="set_type_appointment",
+            #description="Rufe diese Funktion auf, wenn der Nutzer dir die Art des Termin und tieres nennt."), 
+            #function_tool(set_user_info,
+            #name="set_user_info",
+            #description="Rufe diese Funktion auf, wenn der Nutzer dir sein Name, Geburtsdatum und Nummer nennt."),
+            #function_tool(set_user_booking_petStatus_and_time,
+            #name="set_user_booking_petStatus_and_time",
+            #description="Rufe diese Funktion auf, wenn der Nutzer die DringlichkeitStatus mitgeteilt und das Datum und die Zeit der Verfügbarkeit bestätigt hat."
+            # ), 
             function_tool(checks_users_totalInput_before_DBCreation,
             name="checks_users_totalInput_before_DBCreation",
             description="Rufe diese Funktion auf, wenn alle Nutzerdaten geprüft werden sollen oder das Gespräch zu Ende geht."
             ), 
-
-    
-
         ]
     )
     
