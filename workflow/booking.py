@@ -109,6 +109,21 @@ async def check_nutzerData_Input_daten(nutzerdaten:str):
 
     print("trigger in check_nutzerData_Input_daten")
 
+    # Parse the incoming data and update patientenDaten
+    try:
+        import json
+        new_data = json.loads(nutzerdaten)
+        
+        # Update the global patientenDaten with new data
+        for key, value in new_data.items():
+            if key in patientenDaten:
+                patientenDaten[key] = value
+                
+        print("Updated patientenDaten:", patientenDaten)
+        
+    except Exception as e:
+        print(f"Error parsing nutzerdaten: {e}")
+
     # Check which fields are missing from patientenDaten
     missing_fields = []
     for key, value in patientenDaten.items():
