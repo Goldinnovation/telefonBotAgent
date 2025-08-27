@@ -29,3 +29,35 @@ async def CreateEntryService(
 
     except Exception as e:
         raise Exception(f"Database operation failed: {str(e)}")
+
+
+async def GetEntryService(db=None):
+    """Get all entries from the database"""
+    try:    
+        # If no db is provided, get one
+        if db is None:
+            db = await get_db()
+            
+        print("GetEntryService: Fetching all entries")    
+        
+        # Query all records from PatientenTermin table
+        result = await db.query("SELECT * FROM PatientenTermin;")
+        print("Query result:", result)
+        
+        # Handle SurrealDB query result format
+        if result and len(result) > 0:
+            # SurrealDB returns results in a specific format
+            entries = result[0].get("result", []) if isinstance(result[0], dict) else result
+            count = len(entries) if isinstance(entries, list) else 0
+        else:
+            entries = []
+            count = 0
+            
+        return {
+            "status": "success", 
+            "entries": entries,
+            "count": count
+        }
+
+    except Exception as e:
+        raise Exception(f"Database query failed: {str(e)}")

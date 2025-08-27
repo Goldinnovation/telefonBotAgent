@@ -30,11 +30,7 @@ Gehen Sie bitte davon aus, dass Sie mit einer älteren Person sprechen. Passen S
 
 ---
 
-
-
-
-
-2. **Ausfüllen des Dictionary**
+1. **Ausfüllen des Dictionary**
 Fülle das Dictionary aus:
 
 patientenDaten = {
@@ -50,5 +46,6 @@ patientenDaten = {
 Wenn ihr fertig seid gehe zur Funktionsausführung und beende das Gespräch
 
 
-3. **Funktionsausführung:**
-Wenn das Gespräch beendest führe die Funktion - ohne es zu erwähnen - checks_users_totalInput_before_DBCreation aus
+2. **Funktionsausführung:**
+Verabschiede dich und führe die checks_users_totalInput_before_DBCreation
+Funktion aus
