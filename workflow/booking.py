@@ -81,7 +81,7 @@ async def set_user_booking_petStatus_and_time(context: RunContext, dringlichkeit
 
      
 @function_tool 
-def check_current_date(context: RunContext):
+def check_available_dates(context: RunContext):
     from datetime import datetime, timedelta
     import random
     
@@ -118,8 +118,21 @@ def check_current_date(context: RunContext):
     
     result = {}
     for i, date in enumerate(next_working_days):
-        # Pick a random hour between 8 and 18 (8 AM to 6 PM)
-        random_hour = random.randint(8, 18)
+        if i == 0:  # Today
+            # For today, only allow hours in the future
+            current_hour = datetime.now().hour
+            if current_hour >= 18:  # If it's already 6 PM or later, no appointments today
+                continue
+            
+            # Pick a random hour between current hour + 1 and 18 (but at least 8)
+            min_hour = max(current_hour + 1, 8)
+            if min_hour <= 18:
+                random_hour = random.randint(min_hour, 18)
+            else:
+                continue  # No available hours today
+        else:
+            # For future days, pick any hour between 8 and 18
+            random_hour = random.randint(8, 18)
         
         # Create datetime object with random hour, minute=0, second=0, microsecond=0
         datetime_obj = datetime.combine(date, datetime.min.time().replace(hour=random_hour))
