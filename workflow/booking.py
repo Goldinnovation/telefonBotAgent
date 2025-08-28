@@ -79,7 +79,7 @@ async def set_user_booking_petStatus_and_time(context: RunContext, dringlichkeit
 
     return f'Super ich hab information eingetragen sind jetzt im system.'
 
-     
+'''     
 @function_tool 
 def check_available_dates(context: RunContext):
     from datetime import datetime, timedelta
@@ -144,6 +144,89 @@ def check_available_dates(context: RunContext):
             result[day_name] = datetime_obj.isoformat()
     
     return result
+'''
+
+def check_available_dates_in_function():
+    from datetime import datetime, timedelta
+    import random
+    
+    def is_weekday(date):
+        """Check if date is a weekday (Monday-Friday)"""
+        return date.weekday() < 5  # 0=Monday, 4=Friday, 5=Saturday, 6=Sunday
+    
+    def get_next_working_days(start_date, count=5):
+        """Get the next N working days starting from start_date"""
+        working_days = []
+        current_date = start_date
+        
+        while len(working_days) < count:
+            if is_weekday(current_date):
+                working_days.append(current_date)
+            current_date += timedelta(days=1)
+        
+        return working_days
+    
+    # Get today's date
+    today = datetime.now().date()
+    
+    # Get next 5 working days
+    next_working_days = get_next_working_days(today, 5)
+    
+    # Create the dictionary with German day names
+    day_names = {
+        0: "Montag",
+        1: "Dienstag", 
+        2: "Mittwoch",
+        3: "Donnerstag",
+        4: "Freitag"
+    }
+    
+    # German month names for voice-friendly format
+    month_names = {
+        1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni",
+        7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"
+    }
+    
+    result = {}
+    for i, date in enumerate(next_working_days):
+        if i == 0:  # Today
+            # For today, only allow hours in the future
+            current_hour = datetime.now().hour
+            if current_hour >= 18:  # If it's already 6 PM or later, no appointments today
+                continue
+            
+            # Pick a random hour between current hour + 1 and 18 (but at least 8)
+            min_hour = max(current_hour + 1, 8)
+            if min_hour <= 18:
+                random_hour = random.randint(min_hour, 18)
+            else:
+                continue  # No available hours today
+        else:
+            # For future days, pick any hour between 8 and 18
+            random_hour = random.randint(8, 18)
+        
+        # Create datetime object with random hour, minute=0, second=0, microsecond=0
+        datetime_obj = datetime.combine(date, datetime.min.time().replace(hour=random_hour))
+        
+        # Create voice-friendly format
+        day_num = date.day
+        month_name = month_names[date.month]
+        voice_format = f"{day_num}. {month_name} {random_hour} Uhr"
+        iso_format = datetime_obj.isoformat()
+        
+        # Combine both formats with separator
+        combined_format = f"{voice_format}|{iso_format}"
+        
+        if i == 0:
+            result["Heute"] = combined_format
+        else:
+            day_name = day_names[date.weekday()]
+            result[day_name] = combined_format
+    
+    return {
+        "instruction": "Lese nur den menschenlesbaren Teil vor! Speichere den Termin als Iso-Format!",
+        "dates": result
+    }
 
 
 
@@ -207,6 +290,12 @@ async def check_nutzerData_Input_daten(nutzerdaten:str):
     print("missing_fields", missing_fields)
     if len(missing_fields) == 1:
         key = missing_fields[0]
+        
+        # If only Termin is missing, show available dates
+        if key == "Termin":
+            return check_available_dates_in_function()
+        
+        # For other fields, ask for the missing data
         pronoun = pronouns.get(key, "Ihren")
         return f"Ich habe gerade gesehen, dass unser System {pronoun} {key} nicht richtig übernommen hat. Können Sie mir bitte noch {pronoun} {key} nennen?"
 
@@ -217,10 +306,8 @@ async def check_nutzerData_Input_daten(nutzerdaten:str):
     else:
         print("triggerd in db ")
 
-        # Create a PatientData object from the dictionary
-        from db.dbSchema import PatientData
-        patient = PatientData(**patientenDaten)
-        await CreateEntryService(patient)
+        # Pass the dictionary directly (no Pydantic)
+        await CreateEntryService(patientenDaten)
         
         return "Alle Daten sind vorhanden, danke!"
 

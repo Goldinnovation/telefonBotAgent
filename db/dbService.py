@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from db.database import get_db
 from db.dbSchema import PatientData
 
@@ -13,11 +15,15 @@ async def CreateEntryService(
             
         print("CreateEntryService: ", entry)    
         
-        # Convert PatientData object to dictionary
-        entry_data = entry.dict()
+        # Handle both dictionary and Pydantic object
+        if isinstance(entry, dict):
+            entry_data = entry.copy()
+        else:
+            # If it's a Pydantic object, convert to dict
+            entry_data = entry.model_dump() if hasattr(entry, 'model_dump') else entry.dict()
         
         # Add today's date and time
-        from datetime import datetime
+        
         entry_data["created_datetime"] = datetime.now().isoformat()
 
         result = await db.create("PatientenTermin", entry_data)
