@@ -1,4 +1,4 @@
-
+from datetime import datetime
 import asyncio
 import logging
 from dotenv import load_dotenv
@@ -80,7 +80,57 @@ async def set_user_booking_petStatus_and_time(context: RunContext, dringlichkeit
     return f'Super ich hab information eingetragen sind jetzt im system.'
 
      
-
+@function_tool 
+def check_current_date(context: RunContext):
+    from datetime import datetime, timedelta
+    import random
+    
+    def is_weekday(date):
+        """Check if date is a weekday (Monday-Friday)"""
+        return date.weekday() < 5  # 0=Monday, 4=Friday, 5=Saturday, 6=Sunday
+    
+    def get_next_working_days(start_date, count=5):
+        """Get the next N working days starting from start_date"""
+        working_days = []
+        current_date = start_date
+        
+        while len(working_days) < count:
+            if is_weekday(current_date):
+                working_days.append(current_date)
+            current_date += timedelta(days=1)
+        
+        return working_days
+    
+    # Get today's date
+    today = datetime.now().date()
+    
+    # Get next 5 working days
+    next_working_days = get_next_working_days(today, 5)
+    
+    # Create the dictionary with German day names
+    day_names = {
+        0: "Montag",
+        1: "Dienstag", 
+        2: "Mittwoch",
+        3: "Donnerstag",
+        4: "Freitag"
+    }
+    
+    result = {}
+    for i, date in enumerate(next_working_days):
+        # Pick a random hour between 8 and 18 (8 AM to 6 PM)
+        random_hour = random.randint(8, 18)
+        
+        # Create datetime object with random hour, minute=0, second=0, microsecond=0
+        datetime_obj = datetime.combine(date, datetime.min.time().replace(hour=random_hour))
+        
+        if i == 0:
+            result["Heute"] = datetime_obj.isoformat()
+        else:
+            day_name = day_names[date.weekday()]
+            result[day_name] = datetime_obj.isoformat()
+    
+    return result
 
 
 
