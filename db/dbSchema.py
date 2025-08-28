@@ -1,8 +1,9 @@
-from pydantic import BaseModel, validator
+from dataclasses import dataclass
 from typing import Optional
 from datetime import date
 
-class PatientData(BaseModel):
+@dataclass
+class PatientData:
     Name: str
     Geburtstag: str
     Nummer: str

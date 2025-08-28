@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from surrealdb import AsyncSurreal
-from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
 
@@ -25,20 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Response models
-class PatientResponse(BaseModel):
-    status: str
-    result: dict
-
-class PatientsResponse(BaseModel):
-    status: str
-    entries: List[dict]
-    count: int
-
-class ErrorResponse(BaseModel):
-    error: str
-    detail: str
-
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -49,7 +34,7 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "telephony-bot-api"}
 
-@app.post("/patients", response_model=PatientResponse)
+@app.post("/patients")
 async def create_patient(
     patient: PatientData,
     db: AsyncSurreal = Depends(get_db)
@@ -61,7 +46,7 @@ async def create_patient(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/patients", response_model=PatientsResponse)
+@app.get("/patients")
 async def get_all_patients(
     db: AsyncSurreal = Depends(get_db)
 ):
@@ -98,7 +83,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
+        port=8080,
         reload=True,
         log_level="info"
     )
