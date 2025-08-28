@@ -46,9 +46,9 @@ async def GetEntryService(db=None):
         
         # Handle SurrealDB query result format
         if result and len(result) > 0:
-            # SurrealDB returns results in a specific format
-            entries = result[0].get("result", []) if isinstance(result[0], dict) else result
-            count = len(entries) if isinstance(entries, list) else 0
+            # The result is already a list of records
+            entries = result
+            count = len(entries)
         else:
             entries = []
             count = 0
